@@ -122,3 +122,186 @@ You have sucessfully implemented a working igpu passthrough, which many say is i
 
   1. adding a reset_gpu.bat script as logon
   2. and a disable_gpu.bat script on shutdown/restart
+
+# AMD Ryzen 7 5700G Vega 8 (0x1638) Vendor-Reset Testing Documentation
+
+---
+
+## Test 1: amd_vega10_ops
+
+### dmesg Output
+
+[ 1283.704085] vfio-pci 0000:06:00.0: enabling device (0400 -> 0403)  
+[ 1283.704186] vfio-pci 0000:06:00.0: AMD_VEGA10: version 1.0  
+[ 1283.704189] vfio-pci 0000:06:00.0: AMD_VEGA10: performing pre-reset  
+[ 1283.716081] vfio-pci 0000:06:00.0: AMD_VEGA10: performing reset  
+[ 1283.717710] ATOM BIOS: 13-CEZANNE-019  
+[ 1283.717720] vfio-pci 0000:06:00.0: AMD_VEGA10: SMU error 0xfe  
+[ 1283.717733] vfio-pci 0000:06:00.0: AMD_VEGA10: failed to reset device  
+[ 1283.728054] vfio-pci 0000:06:00.0: AMD_VEGA10: reset result = 0  
+
+### Symptoms
+
+- First VM boot post host reboot: Display output but Windows Device Manager shows Error 31.  
+- Second VM boot: Black screen, VM unresponsive.
+
+---
+
+## Test 2: amd_polaris10_ops (Polaris12)
+
+### dmesg Output
+
+[  917.682022] vfio-pci 0000:06:00.0: enabling device (0400 -> 0403)  
+[  917.682125] vfio-pci 0000:06:00.0: AMD_POLARIS12: version 1.1  
+[  917.682128] vfio-pci 0000:06:00.0: AMD_POLARIS12: performing pre-reset  
+[  917.694257] vfio-pci 0000:06:00.0: AMD_POLARIS12: performing reset  
+[  917.718406] vfio-pci 0000:06:00.0: AMD_POLARIS12: reset result = 0  
+
+### Symptoms
+
+- First VM boot without host reboot: Black screen (dirty state).  
+- First VM boot after host reboot: Display output, but Windows Error 31.  
+- VM reboot: Display output, Error 31 persists.
+
+---
+
+## Test 3: amd_vega20_ops
+
+### dmesg Output
+
+[ 1050.564151] vfio-pci 0000:06:00.0: AMD_VEGA20: version 1.0  
+[ 1051.088339] vfio-pci 0000:06:00.0: AMD_VEGA20: psp mode1 reset succeeded  
+[ 1051.112500] vfio-pci 0000:06:00.0: AMD_VEGA20: reset result = 0  
+
+### Symptoms
+
+- VM boots immediately after VM shutdown (no host reboot).  
+- Windows Error 31 persists.  
+- AMD GPU driver installation causes system crashes/reboots.
+
+---
+
+## Test 4: amd_navi10_ops
+
+### dmesg Output
+
+[  472.195742] ATOM BIOS: 13-CEZANNE-019  
+[  472.195751] vfio-pci 0000:06:00.0: AMD_NAVI10: bus reset disabled? yes  
+[  472.195834] vfio-pci 0000:06:00.0: SMU error 0xff  
+[  472.713307] vfio-pci 0000:06:00.0: AMD_NAVI10: mode1 reset succeeded  
+[  472.737506] vfio-pci 0000:06:00.0: AMD_NAVI10: reset result = 0  
+
+### Symptoms
+
+- VM boots showing display output.  
+- Error 31 initially cleared.  
+- AMD driver install causes system freeze.  
+- Subsequent boots black screen.
+
+---
+
+## IOMMU Page Faults
+
+### dmesg Output
+
+[ 1065.485081] amd_iommu_report_page_fault: 113 callbacks suppressed  
+[ 1065.485086] vfio-pci 0000:06:00.0: AMD-Vi: Event logged [IO_PAGE_FAULT domain=0x0000 address=0x342230000 flags=0x0050]  
+... (multiple IO_PAGE_FAULT events) ...  
+
+### Symptoms
+
+- Page faults logged during VM activity, especially after driver installs.  
+- VM freezes and loses display output.
+
+---
+
+## Navi10 VM Reboot Dmesg & Symptoms
+
+### dmesg Output
+
+[  841.752278] ATOM BIOS: 13-CEZANNE-019  
+...  
+[  842.295713] vfio-pci 0000:06:00.0: AMD_NAVI10: reset result = 0  
+
+### Symptoms
+
+- Correct resolution shown.  
+- Error 31 gone.  
+- AMD driver install freezes system.  
+- Virsh shutdown succeeds despite freeze.
+
+---
+
+## Navi10 VM Startup with IOMMU Faults
+
+### dmesg Output
+
+[ 1065.485081] amd_iommu_report_page_fault: 113 callbacks suppressed  
+[ 1067.353925] vfio-pci 0000:06:00.0: AMD_NAVI10: performing post-reset  
+[  991.271365] vfio-pci 0000:06:00.0: SMU error 0xff  
+[ 1067.377927] vfio-pci 0000:06:00.0: AMD_NAVI10: reset result = 0  
+[ 1070.486600] vfio-pci 0000:06:00.0: AMD-Vi: Event logged [IO_PAGE_FAULT domain=0x000c address=...]  
+
+### Symptoms
+
+- GPU dirty after VM reboot.  
+- No display output on some boots.  
+- System instability while installing drivers.
+
+---
+
+You can copy this Markdown content as is into any editor or converter for PDF or other documentation formats. If you want me to help with conversion steps, please let me know!
+
+# Conclusion and Comparison of AMD Ryzen 7 5700G Vendor-Reset Methods
+
+## Overview
+
+Based on extensive testing of various reset methods with the AMD Ryzen 7 5700G integrated Vega 8 GPU, the reset methods vary significantly in effectiveness, kernel reset quality, Windows driver acceptance, and VM stability.
+
+---
+
+## Reset Methods Tested
+
+| Reset Method    | Kernel Reset Stability          | Windows Error 31 Presence | VM Usability & Stability                     |
+|-----------------|--------------------------------|---------------------------|----------------------------------------------|
+| **amd_vega10**  | Poor: SMU errors, reset fails   | Yes                       | VM unusable after reboot, black screen       |
+| **amd_polaris10** | Better, clean reset logs       | Yes                       | Usable but persistent Error 31                |
+| **amd_vega20**   | Good, PSP reset success         | Yes                       | Works with Error 31, driver install crashes  |
+| **amd_navi10**   | Good, some SMU errors tolerated | No initially              | Best Windows usability; freezes on driver install |
+
+---
+
+## Detailed Remarks
+
+- **Worst was `amd_vega10_ops`.** It produced SMU errors and failed to reset properly, resulting in unstable VMs and Windows reporting Error 31 consistently.
+
+- **`amd_polaris10_ops` and `amd_vega20_ops` showed improvements** at the kernel level with cleaner reset logs and successful PSP firmware resets, but Windows guest OS still experienced Error 31, and driver installation caused system crashes or reboots.
+
+- **`amd_navi10_ops` was the best method tested.** It resulted in a VM boot with correct resolution and no Error 31 initially. However, attempts to install official AMD drivers led to system freezes and black screens on subsequent boots, indicating remaining issues with driver and hardware state management.
+
+---
+
+## Additional Observations
+
+- IO_PAGE_FAULT events logged in kernel dmesg suggest IOMMU/memory mapping complications affecting GPU stability during VM lifecycle events.
+
+- Windows drivers are fragile regarding GPU passthrough on Ryzen APUs and often require guest-side reset utilities or complete host reboots to maintain functionality.
+
+- The perfect “clean reset” for integrated AMD GPUs in passthrough scenarios remains a challenging problem, with ongoing active development in vendor-reset and related projects.
+
+---
+
+## Recommendations
+
+- Focus on the `amd_navi10_ops` reset method for best initial VM experience.
+
+- Consider using guest-side tools like RadeonResetBugFix to mitigate driver issues.
+
+- Maintain workflows with host reboot before VM launch to ensure hardware clean states.
+
+- Keep track of BIOS and kernel updates for better IOMMU and GPU reset support.
+
+---
+
+This summary reflects your detailed testing journey and analysis on AMD vendor-reset methods for Ryzen 7 5700G iGPU passthrough.
+
