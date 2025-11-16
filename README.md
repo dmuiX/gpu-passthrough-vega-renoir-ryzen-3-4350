@@ -118,10 +118,18 @@ When you have booted to windows install the amd drivers. actually for me the off
 ### Celebrate
 You have sucessfully implemented a working igpu passthrough, which many say is immpossible :D. 
 
-### Somtimes another stepp is necessary - was the case for the 5700G, the 4350G did work without it!
+### Somtimes another stepp is necessary - was the case for the 5700G, the 4350G did work without it
 
-  1. adding a reset_gpu.bat script as logon
-  2. and a disable_gpu.bat script on shutdown/restart
+I have created a manage-gpu.bat script which can enable disable and reset a GPU and a AUDIO device.
+
+1. find out the corresponding IDs in the device manager under Details/Device instance path
+   looks like this: PCI\VEN_1002&DEV_1638&SUBSYS_D0001458&REV_C8\4&3B1E1872&0&000D
+   you can omit this part "\4&3B1E1872&0&000D" and then set it to the GPU_ID and AUDIO_ID in the script
+2. import disable_gpu.xml and reset_gpu.xml to the task scheduler
+3. save it
+   
+
+
 
 # AMD Ryzen 7 5700G Vega 8 (0x1638) Vendor-Reset Testing Documentation
 
