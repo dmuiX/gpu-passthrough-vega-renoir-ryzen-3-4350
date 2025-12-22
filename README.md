@@ -132,9 +132,28 @@ I have created a manage-gpu.bat script which can enable disable and reset a GPU 
 
 ## have written a qemu hook which removes the devices
 
+```bash
+#!/bin/bash
+echo "$(date '+%Y-%m-%d %H:%M:%S') - HOOK: $1 $2 $3 $4" >> /tmp/libvirt-hook.log
+
+DOMAIN="$1"
+OPERATION="$2"
+PHASE="$3"
+
+if [ "$DOMAIN" = "Win11" ]; then
+    if [ "$OPERATION" = "release" ] && [ "$PHASE" = "end" ]; then
+        echo "GPU RESET TRIGGERED" >> /tmp/libvirt-hook.log
+        sleep 2
+        echo 1 > /sys/bus/pci/devices/0000:06:00.0/remove 2>/dev/null
+        sleep 5
+        echo 1 > /sys/bus/pci/devices/0000:06:00.1/remove 2>/dev/null
+        sleep 10
+        echo 1 > /sys/bus/pci/rescan
+        sleep 10
+    fi
+fi
 ```
 
-```
 ### just using this remove hook
 
 error 31 and then after second boot not responding at all
