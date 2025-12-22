@@ -128,7 +128,30 @@ I have created a manage-gpu.bat script which can enable disable and reset a GPU 
 2. import disable_gpu.xml and reset_gpu.xml to the task scheduler
 3. save it
    
+# another test marathon:
 
+## have written a qemu hook which removes the devices
+
+```
+
+```
+### just using this remove hook
+
+error 31 and then after second boot not responding at all
+
+### remove hook + windows script
+
+
+### just windows scripts no reset no remove
+
+
+### reset vega10 + windows script
+
+I think i have done that already
+
+### reset navi10 + windows script
+
+I think i have done this also already
 
 
 # AMD Ryzen 7 5700G Vega 8 (0x1638) Vendor-Reset Testing Documentation
