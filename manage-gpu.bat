@@ -1,9 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
 
-rem THIS IS A GPU RESET SCRIPT
-rem can enable and disable a gpu and the coresponding hdmi device
-rem you just need to set the GPU_ID and AUDIO_ID variables
 rem === Parameter Check ===
 if /i "%~1"=="/enable" (
     set "ACTION=enable"
@@ -14,8 +11,6 @@ if /i "%~1"=="/enable" (
     set "ACTION_VERB=Disabling"
     set "PNP_CMD=disable-device"
 ) else if /i "%~1"=="/reset" (
-    echo Resetting devices...
-    echo.
     echo Disabling devices...
     call "%~f0" /disable
     echo.
