@@ -2,6 +2,12 @@
 
 ## Finally Figured Out how to make the iGPU run as a passthrough GPU!
 
+### Best way
+
+is definetly to add the igpu to vendor_reset src file like that: {PCI_VENDOR_ID_ATI, 0x1636, op, DEVICE_INFO(AMD_NAVI10)}, \
+and then add a manage-gpu script in Windows wich resets the gpu on startup and disables it on shutdown
+
+## Some Instructions
 here some one has describe what he had done to make it work:
 
 https://forum.proxmox.com/threads/amd-ryzen-5600g-igpu-code-43-error.138665/
@@ -127,7 +133,10 @@ I have created a manage-gpu.bat script which can enable disable and reset a GPU 
    you can omit this part "\4&3B1E1872&0&000D" and then set it to the GPU_ID and AUDIO_ID in the script
 2. import disable_gpu.xml and reset_gpu.xml to the task scheduler
 3. save it
-   
+
+
+# Have added a swap-gpu script which swaps my passthrough gpu to the virtio gpu + vnc
+
 # another test marathon:
 
 ## have written a qemu hook which removes the devices
@@ -153,7 +162,7 @@ if [ "$DOMAIN" = "Win11" ]; then
     fi
 fi
 ```
-
+=> Does not work!
 ### just using this remove hook
 
 error 31 and then after second boot not responding at all
