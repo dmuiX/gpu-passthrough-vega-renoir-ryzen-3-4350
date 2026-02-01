@@ -12,8 +12,19 @@ It may also work for other APUs or even some discrete GPUs (dGPUs) — **but no 
 Your exact combo of **hardware + BIOS + kernel + drivers** decides everything.
 
 ---
-Note: This was rock-solid for me on Debian 12 + kernel 6.12.
-On Debian 13 + newer kernels results may vary and it might NOT WORK!
+Note: This was rock-solid for me on Debian 12 + kernel 6.12.12
+On Debian 13 + newest kernel 6.12.57 or even 6.16 or 6.17 no chance
+
+NEW FINDINGS:
+I had a working version before I upgraded to Debian 13 on 10. January 2026
+Since then my VM crashed when I started a Game or even When I tried to login physically on the Monitor
+
+- libvirt, qemu, ovmf downgrade: so far no change
+- kernel downgrade to 6.12.12 also no change
+- removed firmware-amd-graphics completely
+- downgrade Windows Treiber to 25.8.1: This has fixed a login crash!
+
+Result: so far still crashes under Load...
 
 ## Architecture (high-level)
 
