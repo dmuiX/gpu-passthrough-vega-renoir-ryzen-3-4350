@@ -22,9 +22,11 @@ Since then my VM crashed when I started a Game or even When I tried to login phy
 - libvirt, qemu, ovmf downgrade: so far no change
 - kernel downgrade to 6.12.12 also no change
 - removed firmware-amd-graphics completely
-- downgrade Windows Treiber to 25.8.1: This has fixed a login crash!
+- downgrade Windows Treiber to 25.8.1: This has fixed at least the login crash!!
 
 Result: so far still crashes under Load...
+
+---
 
 ## Architecture (high-level)
 
